@@ -1,0 +1,52 @@
+
+{
+  "name": "gestorpro-desktop",
+  "version": "1.0.0",
+  "description": "Sistema de Gestão de Estoque Local",
+  "main": "main.js",
+  "author": "Seu Nome ou Empresa",
+  "scripts": {
+    "start": "electron .",
+    "clean": "rimraf dist",
+    "dist": "electron-builder --win",
+    "dist:portable": "electron-builder --win --portable"
+  },
+  "build": {
+    "appId": "com.gestorpro.app",
+    "productName": "GestorPro",
+    "copyright": "Copyright © 2024",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "icon": "icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "GestorPro"
+    }
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3",
+    "rimraf": "^5.0.0"
+  }
+}

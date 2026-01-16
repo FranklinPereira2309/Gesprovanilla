@@ -1,0 +1,6 @@
+
+{
+  "name": "GestorPro Desktop",
+  "description": "Controle de estoque local com persistência em JSON",
+  "requestFramePermissions": []
+}

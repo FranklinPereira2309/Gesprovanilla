@@ -1,0 +1,168 @@
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #f3f4f6;
+    margin: 0;
+    padding: 0;
+}
+
+/* Área de arraste da janela (apenas para modo janela) */
+.title-bar-drag {
+    -webkit-app-region: drag;
+    z-index: 4000;
+    background: transparent;
+    pointer-events: none;
+}
+
+/* Interatividade total */
+input, select, textarea, button, a, [onclick] {
+    -webkit-app-region: no-drag;
+    pointer-events: auto !important;
+    cursor: pointer;
+}
+
+input, select, textarea, [contenteditable="true"] {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+    cursor: text !important;
+    caret-color: #2563eb !important;
+}
+
+.nav-btn, button, h1, h2, h3, h4, th, .user-avatar {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.glass {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+.win-shadow {
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+}
+
+input, select {
+    background: white !important;
+    border: 1px solid #e5e7eb !important;
+    transition: all 0.2s ease;
+}
+
+input:focus, select:focus {
+    border-color: #2563eb !important;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1) !important;
+    outline: none;
+}
+
+.nav-btn {
+    color: #64748b;
+    font-size: 0.875rem;
+    text-align: left;
+}
+
+.nav-btn:hover {
+    background: rgba(0, 0, 0, 0.03);
+    color: #1f2937;
+}
+
+.nav-btn.active {
+    background: #2563eb;
+    color: white;
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
+}
+
+/* ANIMAÇÕES GERAIS */
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-up {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* ANIMAÇÕES SPLASH */
+@keyframes splash-content {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes bounce-soft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes loading-bar {
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(0); }
+    100% { transform: translateX(100%); }
+}
+
+@keyframes fade-out {
+    from { opacity: 1; }
+    to { opacity: 0; visibility: hidden; }
+}
+
+.animate-fade-in { animation: fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+.animate-scale-up { animation: scale-up 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.animate-splash-content { animation: splash-content 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.animate-bounce-soft { animation: bounce-soft 3s ease-in-out infinite; }
+.animate-loading-bar { animation: loading-bar 2s ease-in-out infinite; }
+.animate-fade-in-delayed { animation: fade-in 1s cubic-bezier(0.4, 0, 0.2, 1) forwards; animation-delay: 0.5s; opacity: 0; }
+.splash-fade-out { animation: fade-out 0.8s forwards; pointer-events: none; }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+
+/* REGRAS DE IMPRESSÃO OTIMIZADAS */
+@media screen {
+    .hidden-on-screen { display: none; }
+}
+
+@media print {
+    .no-print { display: none !important; }
+    body { 
+        background: white !important; 
+        overflow: visible !important; 
+        height: auto !important; 
+        counter-reset: page; 
+    }
+    #main-app { display: none !important; }
+    #print-area { display: block !important; }
+    
+    @page { 
+        margin: 1.5cm; 
+    }
+
+    .page-footer-space {
+        height: 50px;
+    }
+
+    .page-footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 10px;
+        font-size: 9px;
+        color: #64748b;
+        text-align: right;
+    }
+
+    .page-footer::after {
+        counter-increment: page;
+        content: "Página " counter(page);
+    }
+
+    /* Força o navegador a repetir o thead em cada página */
+    table { width: 100%; border-collapse: collapse; }
+    thead { display: table-header-group; }
+    tfoot { display: table-footer-group; }
+}

@@ -1,0 +1,328 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GestorPro Desktop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script type="importmap">
+    {
+      "imports": {
+        "@google/genai": "https://esm.sh/@google/genai@^1.37.0"
+      }
+    }
+    </script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="antialiased overflow-hidden h-screen flex flex-col">
+    
+    <!-- SPLASH SCREEN -->
+    <div id="splash-screen" class="fixed inset-0 z-[10000] flex flex-col items-center justify-center bg-[#0f172a] no-print">
+        <div class="relative flex flex-col items-center animate-splash-content">
+            <!-- Logo Icon -->
+            <div class="w-24 h-24 bg-blue-600 rounded-[2rem] flex items-center justify-center shadow-2xl shadow-blue-500/20 mb-8 animate-bounce-soft">
+                <svg class="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+            </div>
+            
+            <!-- App Name -->
+            <h1 class="text-5xl font-black text-white tracking-tighter mb-2">Gestor Pro</h1>
+            <div class="flex items-center gap-3">
+                <div class="h-[2px] w-8 bg-blue-600/50"></div>
+                <p class="text-blue-400 text-[10px] font-black uppercase tracking-[0.3em]">Sistema de Gestão Local</p>
+                <div class="h-[2px] w-8 bg-blue-600/50"></div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div class="mt-12 flex flex-col items-center gap-4">
+                <div class="w-12 h-1 text-gray-800 bg-gray-800 rounded-full overflow-hidden">
+                    <div class="h-full bg-blue-500 animate-loading-bar"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Author Branding -->
+        <div class="absolute bottom-12 text-center animate-fade-in-delayed">
+            <span class="text-gray-500 text-[9px] font-black uppercase tracking-widest block mb-1">Desenvolvido por</span>
+            <span class="text-gray-300 font-['JetBrains_Mono'] text-xs font-bold">Fransoft Developer®</span>
+        </div>
+    </div>
+
+    <div class="title-bar-drag fixed top-0 left-0 w-full h-8 z-[9999] no-print"></div>
+
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen" class="fixed inset-0 z-[5000] flex items-center justify-center bg-gray-100 no-print">
+        <div class="glass win-shadow w-full max-w-sm p-10 rounded-[2.5rem] border border-white animate-fade-in relative">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-blue-600 rounded-2xl mx-auto flex items-center justify-center shadow-xl shadow-blue-200 mb-4">
+                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                </div>
+                <h1 class="text-3xl font-black tracking-tighter">GestorPro</h1>
+                <p id="login-subtitle" class="text-gray-400 text-sm font-bold">Autenticação Local Requerida</p>
+            </div>
+            <form id="auth-form" class="space-y-4">
+                <div id="name-field" class="hidden space-y-1">
+                    <input id="auth-name" type="text" placeholder="Nome Completo" class="w-full px-5 py-3.5 rounded-2xl border border-gray-200 outline-none">
+                </div>
+                <input id="auth-email" required type="email" placeholder="E-mail" class="w-full px-5 py-3.5 rounded-2xl border border-gray-200 outline-none">
+                <input id="auth-password" required type="password" placeholder="Senha" class="w-full px-5 py-3.5 rounded-2xl border border-gray-200 outline-none">
+                <button type="submit" class="w-full py-4 bg-gray-900 text-white font-black rounded-2xl shadow-xl hover:bg-black transition-all">Entrar</button>
+            </form>
+            <button id="toggle-auth" class="w-full mt-6 text-xs font-black text-blue-600 uppercase tracking-widest">Registrar Administrador</button>
+            <button id="exit-login-btn" class="w-full mt-8 text-[10px] font-black text-gray-400 uppercase tracking-widest hover:text-red-500 transition-colors flex items-center justify-center gap-2">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                Sair do Sistema
+            </button>
+        </div>
+    </div>
+
+    <!-- APP PRINCIPAL -->
+    <div id="main-app" class="hidden flex h-full w-full no-print">
+        <aside class="w-64 glass border-r border-gray-200 flex flex-col p-5">
+            <div class="flex items-center gap-3 mb-12 mt-4 px-2">
+                <div class="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-100"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg></div>
+                <h1 class="text-xl font-black tracking-tighter">GestorPro</h1>
+            </div>
+            <nav class="flex-1 space-y-1">
+                <button data-tab="dashboard" class="nav-btn active w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all font-black uppercase text-[10px] tracking-widest">Dashboard</button>
+                <button data-tab="inventory" class="nav-btn w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all font-black uppercase text-[10px] tracking-widest">Estoque</button>
+                <button data-tab="sales" class="nav-btn w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all font-black uppercase text-[10px] tracking-widest">Vendas</button>
+                <button data-tab="quotes" class="nav-btn w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all font-black uppercase text-[10px] tracking-widest">Orçamentos</button>
+            </nav>
+            <div class="mt-auto border-t border-gray-100 pt-6">
+                <div class="flex items-center gap-3 mb-4 px-2">
+                    <div id="user-avatar" class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-black shadow-md">U</div>
+                    <div class="flex flex-col truncate">
+                        <span id="user-name" class="text-xs font-black text-gray-800">Usuário</span>
+                        <span class="text-[9px] font-bold text-gray-400 uppercase">Admin Local</span>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <button id="logout-btn" class="text-[10px] font-black text-red-500 uppercase tracking-widest px-2 hover:underline text-left">Desconectar</button>
+                    <button id="exit-app-btn" class="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2 hover:text-red-500 transition-colors text-left flex items-center gap-2">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        Encerrar Sistema
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-auto p-12 bg-gray-50/50">
+            <div id="content-area" class="max-w-6xl mx-auto"></div>
+        </main>
+    </div>
+
+    <!-- MODAL PRODUTO -->
+    <div id="product-modal" class="hidden fixed inset-0 z-[6000] flex items-center justify-center bg-black/10 backdrop-blur-sm p-4 no-print">
+        <div class="glass win-shadow w-full max-w-md rounded-[2.5rem] border border-white p-10 animate-scale-up">
+            <h3 id="modal-title" class="text-2xl font-black mb-8 tracking-tight">Produto</h3>
+            <form id="product-form" class="space-y-5">
+                <input type="hidden" id="product-id">
+                <div>
+                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1 block">Descrição do Item</label>
+                    <input required id="p-desc" type="text" placeholder="Ex: Monitor 4K Dell" class="w-full px-5 py-3.5 rounded-2xl border border-gray-200 outline-none">
+                </div>
+                <div>
+                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1 block">Categoria</label>
+                    <input required id="p-cat" type="text" placeholder="Ex: Eletrônicos" class="w-full px-5 py-3.5 rounded-2xl border border-gray-200 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-5">
+                    <div>
+                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1 block">Qtd Estoque</label>
+                        <input required id="p-qty" type="number" placeholder="0" class="w-full px-5 py-3.5 rounded-2xl border border-gray-200 outline-none font-bold">
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1 block">Custo Unitário</label>
+                        <input required id="p-buy" type="number" step="0.01" placeholder="0.00" class="w-full px-5 py-3.5 rounded-2xl border border-gray-200 outline-none font-bold">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1 block">Margem de Lucro (%)</label>
+                    <input required id="p-margin" type="number" placeholder="30" class="w-full px-5 py-3.5 rounded-2xl border border-gray-200 outline-none font-bold">
+                </div>
+                <div class="p-6 bg-blue-600 rounded-[1.5rem] text-white flex justify-between items-center shadow-lg shadow-blue-100">
+                    <span class="text-[9px] font-black uppercase tracking-widest text-blue-100">Venda Sugerida:</span>
+                    <span id="p-sell-display" class="font-black text-2xl">R$ 0,00</span>
+                </div>
+                <div class="flex justify-end gap-3 pt-6">
+                    <button type="button" class="close-modal text-gray-400 font-black text-[10px] uppercase tracking-widest px-6">Cancelar</button>
+                    <button type="submit" class="bg-gray-900 text-white px-10 py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl">Salvar Produto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL VENDA -->
+    <div id="sale-modal" class="hidden fixed inset-0 z-[6000] flex items-center justify-center bg-black/10 backdrop-blur-sm p-4 no-print">
+        <div class="glass win-shadow w-full max-w-lg rounded-[2.5rem] border border-white p-8 animate-scale-up flex flex-col max-h-[90vh]">
+            <h3 class="text-2xl font-black mb-6 tracking-tight">Ponto de Venda</h3>
+            <div class="space-y-4 mb-6">
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-2">
+                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1 block">Produto</label>
+                        <select id="s-product" class="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none bg-gray-50 font-bold text-sm"></select>
+                    </div>
+                    <div>
+                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1 block">Qtd</label>
+                        <input id="s-qty" type="number" min="1" value="1" class="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none font-black text-sm">
+                    </div>
+                </div>
+                <button id="btn-add-to-cart" class="w-full py-3 bg-blue-100 text-blue-700 font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-blue-200 transition-all">+ Adicionar ao Cupom</button>
+            </div>
+            <div class="flex-1 overflow-auto bg-white/50 border border-gray-200 rounded-2xl p-4 font-['JetBrains_Mono'] text-[10px] text-gray-600">
+                <div class="border-b border-dashed border-gray-300 pb-2 mb-2 flex justify-between font-bold">
+                    <span>ITEM/DESCRIÇÃO</span>
+                    <span>TOTAL</span>
+                </div>
+                <div id="cart-items-list" class="space-y-2 min-h-[100px]">
+                    <div class="text-center py-4 text-gray-300 italic">Cupom vazio</div>
+                </div>
+                <div class="border-t border-dashed border-gray-300 mt-4 pt-2">
+                    <div class="flex justify-between items-center text-gray-900 font-bold text-xs">
+                        <span>TOTAL GERAL</span>
+                        <span id="cart-total-display">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+            <form id="sale-form" class="mt-6 space-y-4">
+                <div>
+                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1 block">Forma de Pagamento</label>
+                    <select id="s-pay" class="w-full px-5 py-3.5 rounded-2xl border border-gray-200 outline-none bg-gray-50 font-bold text-xs">
+                        <option>Dinheiro</option><option>PIX</option><option>Cartão Crédito</option><option>Cartão Débito</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" class="close-modal text-gray-400 font-black text-[10px] uppercase tracking-widest px-6">Cancelar</button>
+                    <button type="submit" class="bg-green-600 text-white px-10 py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-green-100">Finalizar Transação</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL ORÇAMENTO -->
+    <div id="quote-modal" class="hidden fixed inset-0 z-[6000] flex items-center justify-center bg-black/10 backdrop-blur-sm p-4 no-print">
+        <div class="glass win-shadow w-full max-w-2xl rounded-[2.5rem] border border-white p-8 animate-scale-up flex flex-col max-h-[95vh]">
+            <h3 class="text-2xl font-black mb-4 tracking-tight">Proposta de Orçamento</h3>
+            
+            <div class="space-y-4 flex flex-col overflow-hidden">
+                <!-- Seção do Cliente Compacta -->
+                <div class="grid grid-cols-12 gap-2 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                    <div class="col-span-12 md:col-span-6">
+                        <label class="text-[8px] font-black text-gray-400 uppercase tracking-widest ml-1 block">Nome do Cliente</label>
+                        <input id="q-customer" type="text" placeholder="Ex: João Silva" class="w-full px-3 py-2 rounded-lg border border-gray-200 outline-none font-bold text-xs">
+                    </div>
+                    <div class="col-span-7 md:col-span-4">
+                        <label class="text-[8px] font-black text-gray-400 uppercase tracking-widest ml-1 block">E-mail</label>
+                        <input id="q-email" type="email" placeholder="email@exemplo.com" class="w-full px-3 py-2 rounded-lg border border-gray-200 outline-none text-xs">
+                    </div>
+                    <div class="col-span-5 md:col-span-2">
+                        <label class="text-[8px] font-black text-gray-400 uppercase tracking-widest ml-1 block">Fone</label>
+                        <input id="q-phone" type="text" placeholder="(00) 00000" class="w-full px-3 py-2 rounded-lg border border-gray-200 outline-none text-xs">
+                    </div>
+                </div>
+
+                <!-- Adicionar Item Compacto -->
+                <div class="grid grid-cols-12 gap-2">
+                    <div class="col-span-12 md:col-span-7">
+                        <label class="text-[8px] font-black text-gray-400 uppercase tracking-widest ml-1 block">Produto</label>
+                        <select id="q-product" class="w-full px-3 py-2 rounded-lg border border-gray-200 outline-none bg-white font-bold text-xs"></select>
+                    </div>
+                    <div class="col-span-4 md:col-span-2">
+                        <label class="text-[8px] font-black text-gray-400 uppercase tracking-widest ml-1 block">Qtd</label>
+                        <input id="q-qty" type="number" min="1" value="1" class="w-full px-3 py-2 rounded-lg border border-gray-200 outline-none font-black text-xs">
+                    </div>
+                    <div class="col-span-8 md:col-span-3 flex items-end">
+                        <button id="btn-add-to-quote" class="w-full py-2 bg-blue-600 text-white font-black text-[9px] uppercase tracking-widest rounded-lg hover:bg-blue-700 transition-all shadow-md">Adicionar</button>
+                    </div>
+                </div>
+
+                <!-- Lista de Itens Estilo Cupom -->
+                <div class="flex-1 overflow-auto bg-white border border-gray-200 rounded-2xl p-5 font-['JetBrains_Mono'] text-[10px] text-gray-600 min-h-[150px]">
+                    <div class="border-b border-dashed border-gray-300 pb-2 mb-2 flex justify-between font-bold">
+                        <span>DESCRIÇÃO / QTD / UNIT</span>
+                        <span>SUBTOTAL</span>
+                    </div>
+                    <div id="quote-items-list" class="space-y-2">
+                        <!-- Itens inseridos via JS -->
+                    </div>
+                </div>
+
+                <!-- Resumo e Validade -->
+                <div class="flex justify-between items-center bg-gray-50 p-4 rounded-2xl">
+                    <div class="flex items-center gap-3">
+                        <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest">Validade:</label>
+                        <input id="q-validity" type="number" value="7" class="w-16 px-2 py-1.5 rounded-lg border border-gray-200 outline-none font-black text-xs">
+                        <span class="text-[9px] font-bold text-gray-400 uppercase">Dias</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest block">Total Estimado</span>
+                        <span id="quote-total-display" class="text-2xl font-black text-blue-600">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <!-- Ações do Modal -->
+                <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                    <input type="hidden" id="quote-id">
+                    <button type="button" class="close-modal text-gray-400 font-black text-[10px] uppercase tracking-widest px-6 hover:text-gray-600 transition-colors">Cancelar</button>
+                    <button id="btn-save-quote" class="bg-gray-900 text-white px-10 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-black transition-all">Salvar Proposta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAIS DE ALERTA E FILTRO (IGUAIS) -->
+    <div id="critical-modal" class="hidden fixed inset-0 z-[6000] flex items-center justify-center bg-black/10 backdrop-blur-sm p-4 no-print">
+        <div class="glass win-shadow w-full max-w-lg rounded-[2.5rem] border border-white p-10 animate-scale-up flex flex-col max-h-[80vh]">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="p-3 bg-amber-100 text-amber-600 rounded-2xl">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <h3 class="text-2xl font-black tracking-tight text-gray-800">Alertas de Estoque</h3>
+            </div>
+            <div class="flex-1 overflow-auto rounded-2xl border border-gray-100">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-50/50 sticky top-0 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        <tr>
+                            <th class="px-6 py-4">Produto</th>
+                            <th class="px-6 py-4 text-center">Qtd Atual</th>
+                        </tr>
+                    </thead>
+                    <tbody id="critical-items-list" class="divide-y divide-gray-100 bg-white">
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-end pt-8">
+                <button type="button" class="close-modal bg-gray-900 text-white px-10 py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl">Fechar Alertas</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="report-filter-modal" class="hidden fixed inset-0 z-[6000] flex items-center justify-center bg-black/10 backdrop-blur-sm p-4 no-print">
+        <div class="glass win-shadow w-full max-w-md rounded-[2.5rem] border border-white p-10 animate-scale-up">
+            <h3 class="text-2xl font-black mb-8 tracking-tight">Relatório de Vendas</h3>
+            <form id="report-filter-form" class="space-y-5">
+                <div>
+                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1 block">Data Inicial</label>
+                    <input required id="report-date-start" type="date" class="w-full px-5 py-3.5 rounded-2xl border border-gray-200 outline-none font-bold">
+                </div>
+                <div>
+                    <label class="text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1 mb-1 block">Data Final</label>
+                    <input required id="report-date-end" type="date" class="w-full px-5 py-3.5 rounded-2xl border border-gray-200 outline-none font-bold">
+                </div>
+                <div class="flex justify-end gap-3 pt-6">
+                    <button type="button" id="close-report-modal" class="text-gray-400 font-black text-[10px] uppercase tracking-widest px-6">Cancelar</button>
+                    <button type="submit" class="bg-blue-600 text-white px-10 py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl shadow-blue-100">Gerar Relatório</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="print-area" class="hidden-on-screen"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="script.js"></script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
